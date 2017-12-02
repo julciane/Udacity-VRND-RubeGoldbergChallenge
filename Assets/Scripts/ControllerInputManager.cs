@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class ControllerInputManager : MonoBehaviour
 {
-    public bool isLeftHand;
-    
+    public bool isLeftController;
+
+    public float throwForce = 1.5f;
+    private OVRInput.Controller thisController;
+
     //Teleport
     private LineRenderer laser;
     public GameObject teleportAimerObject;
@@ -17,6 +20,14 @@ public class ControllerInputManager : MonoBehaviour
     void Start()
     {
         laser = GetComponentInChildren<LineRenderer>();
+        if (isLeftController)
+        {
+            thisController = OVRInput.Controller.LTouch;
+        }
+        else
+        {
+            thisController = OVRInput.Controller.RTouch;
+        }
     }
 
     // Update is called once per frame
@@ -28,7 +39,7 @@ public class ControllerInputManager : MonoBehaviour
 
     private void Teleport()
     {
-        if (isLeftHand)
+        if (isLeftController)
         {
             //X button is pressed
             if (OVRInput.Get(OVRInput.Button.One))
@@ -67,5 +78,42 @@ public class ControllerInputManager : MonoBehaviour
 
             }
         }
+    }
+
+    private void OnTriggerStay(Collider col)
+    {
+        if (col.gameObject.CompareTag("Throwable"))
+        {
+            if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, thisController) < 0.1f)
+            {
+                ThrowObject(col);
+            }
+            else if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, thisController) > 0.1f)
+            {
+                GrabObj(col);
+            }
+        }
+    }
+
+    private void GrabObj(Collider col)
+    {
+        col.transform.SetParent(gameObject.transform);
+        col.GetComponent<Rigidbody>().isKinematic = true;
+        Debug.Log("You are touching down the trigger on an object");
+    }
+
+    private void ThrowObject(Collider col)
+    {
+        col.transform.SetParent(null);
+        Rigidbody rigidBody = col.GetComponent<Rigidbody>();
+        rigidBody.isKinematic = false;
+
+        //rigidBody.velocity = device.velocity * throwForce;
+        rigidBody.velocity = OVRInput.GetLocalControllerVelocity(thisController) * throwForce;
+
+        //rigidBody.angularVelocity = device.angularVelocity;
+        rigidBody.angularVelocity = OVRInput.GetLocalControllerAngularVelocity(thisController);
+
+        Debug.Log("You have released the trigger");
     }
 }
