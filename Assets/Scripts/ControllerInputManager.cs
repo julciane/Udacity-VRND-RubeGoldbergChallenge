@@ -42,7 +42,7 @@ public class ControllerInputManager : MonoBehaviour
         if (isLeftController)
         {
             //X button is pressed
-            if (OVRInput.Get(OVRInput.Button.One))
+            if (OVRInput.Get(OVRInput.Button.Three))
             {
                 
                 //Showing laser
@@ -67,7 +67,7 @@ public class ControllerInputManager : MonoBehaviour
                 }
             }
 
-            if (OVRInput.GetUp(OVRInput.Button.One))
+            if (OVRInput.GetUp(OVRInput.Button.Three))
             {
                 //X button was released this frame, let's teleport our player and hide teleport aimer
                 laser.gameObject.SetActive(false);
